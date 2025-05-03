@@ -6,6 +6,7 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from werkzeug.security import generate_password_hash, check_password_hash
 from markupsafe import Markup
 from email_validator import validate_email, EmailNotValidError
+import json
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
@@ -46,6 +47,12 @@ class RegistrationForm(FlaskForm):
 class LoginForm(FlaskForm):
     email = StringField('Email', [validators.DataRequired(), validators.Email()])
     password = PasswordField('Пароль', [validators.DataRequired()])
+
+
+class Book(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    cover_url = db.Column(db.String(500), nullable=False)
 
 
 @login_manager.user_loader
@@ -107,7 +114,20 @@ def logout():
 
 @app.route('/books')
 def book_list():
-    return "<h2>Каталог книг (пока пусто)</h2>"
+    if Book.query.count() == 0:
+        with open('books.json', encoding='utf-8') as f:
+            books_data = json.load(f)
+            for item in books_data:
+                book = Book(
+                    title=item.get('name', ''),
+                    cover_url=item.get('cover_url', '')
+                )
+                db.session.add(book)
+            db.session.commit()
+    page = request.args.get('page', 1, type=int)
+    pagination = Book.query.paginate(page=page, per_page=30, error_out=False)
+    books = pagination.items
+    return render_template('books.html', books=books, pagination=pagination)
 
 
 if __name__ == '__main__':
