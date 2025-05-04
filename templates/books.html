@@ -1,4 +1,7 @@
 <style>
+    body {
+        background-image: url("https://bgfons.com/uploads/ornaments/ornaments_texture1133.jpg")
+    }
     .book-list {
         display: grid;
         grid-template-columns: repeat(5, 1fr);
@@ -69,7 +72,7 @@
     {% for book in books %}
     <div class="book-item">
         <img src="{{ book.cover_url }}" alt="Обложка {{ book.title }}">
-        <div class="book-title">{{ book.title }}</div>
+        <div class="book-title" style="color: white;">{{ book.title }}</div>
     </div>
     {% else %}
     <p>Книг пока нет.</p>
@@ -81,7 +84,7 @@
     {% if pagination.has_prev %}
     <a href="{{ url_for('book_list', page=pagination.prev_num) }}" class="page-link">&laquo; Назад</a>
     {% else %}
-    <span class="page-link disabled">&laquo; Назад</span>
+    <span class="page-link disabled" style="color: white;">&laquo; Назад</span>
     {% endif %}
 
     {# Номера страниц с ограничением #}
@@ -89,7 +92,7 @@
     {% set end = pagination.page + 3 if pagination.page + 3 < pagination.pages else pagination.pages %}
 
     {% if start > 1 %}
-    <a href="{{ url_for('book_list', page=1) }}" class="page-link">1</a>
+    <a href="{{ url_for('book_list', page=1) }}" class="page-link" style="color: white;">1</a>
     {% if start > 2 %}
     <span class="dots">...</span>
     {% endif %}
@@ -97,22 +100,22 @@
 
     {% for p in range(start, end + 1) %}
     {% if p == pagination.page %}
-    <span class="page-link active">{{ p }}</span>
+    <span class="page-link active" style="color: white;">{{ p }}</span>
     {% else %}
-    <a href="{{ url_for('book_list', page=p) }}" class="page-link">{{ p }}</a>
+    <a href="{{ url_for('book_list', page=p) }}" class="page-link" style="color: white;">{{ p }}</a>
     {% endif %}
     {% endfor %}
 
     {% if end < pagination.pages %}
     {% if end < pagination.pages - 1 %}
-    <span class="dots">...</span>
+    <span class="dots" style="color: white;">...</span>
     {% endif %}
-    <a href="{{ url_for('book_list', page=pagination.pages) }}" class="page-link">{{ pagination.pages }}</a>
+    <a href="{{ url_for('book_list', page=pagination.pages) }}" class="page-link" style="color: white;">{{ pagination.pages }}</a>
     {% endif %}
 
     {# Кнопка "Вперед" #}
     {% if pagination.has_next %}
-    <a href="{{ url_for('book_list', page=pagination.next_num) }}" class="page-link">Вперед &raquo;</a>
+    <a href="{{ url_for('book_list', page=pagination.next_num) }}" class="page-link" style="color: white;">Вперед &raquo;</a>
     {% else %}
     <span class="page-link disabled">Вперед &raquo;</span>
     {% endif %}
