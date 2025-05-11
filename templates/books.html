@@ -22,6 +22,15 @@
         font-weight: bold;
         font-size: 1em;
     }
+
+    .book-author {
+    font-size: 0.85em;
+    color: rgba(255, 255, 255, 0.9);
+    margin-top: 4px;
+    font-style: italic;
+    font-family: 'Georgia', 'Times New Roman', Times, serif;
+    }
+
     .pagination {
     text-align: center;
     margin-bottom: 30px;
@@ -73,6 +82,7 @@
     <div class="book-item">
         <img src="{{ book.cover_url }}" alt="Обложка {{ book.title }}">
         <div class="book-title" style="color: white;">{{ book.title }}</div>
+        <div class="book-author">{{ book.author }}</div>
     </div>
     {% else %}
     <p>Книг пока нет.</p>
@@ -110,12 +120,14 @@
     {% if end < pagination.pages - 1 %}
     <span class="dots" style="color: white;">...</span>
     {% endif %}
-    <a href="{{ url_for('book_list', page=pagination.pages) }}" class="page-link" style="color: white;">{{ pagination.pages }}</a>
+    <a href="{{ url_for('book_list', page=pagination.pages) }}" class="page-link" style="color: white;">{{
+        pagination.pages }}</a>
     {% endif %}
 
     {# Кнопка "Вперед" #}
     {% if pagination.has_next %}
-    <a href="{{ url_for('book_list', page=pagination.next_num) }}" class="page-link" style="color: white;">Вперед &raquo;</a>
+    <a href="{{ url_for('book_list', page=pagination.next_num) }}" class="page-link" style="color: white;">Вперед
+        &raquo;</a>
     {% else %}
     <span class="page-link disabled">Вперед &raquo;</span>
     {% endif %}

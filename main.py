@@ -52,6 +52,7 @@ class LoginForm(FlaskForm):
 class Book(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
+    author = db.Column(db.String(100), nullable=True)
     cover_url = db.Column(db.String(500), nullable=False)
 
 
@@ -120,6 +121,7 @@ def book_list():
             for item in books_data:
                 book = Book(
                     title=item.get('name', ''),
+                    author=item.get('author', 'Неизвестен'),
                     cover_url=item.get('cover_url', '')
                 )
                 db.session.add(book)
@@ -132,5 +134,6 @@ def book_list():
 
 if __name__ == '__main__':
     with app.app_context():
+        db.drop_all()
         db.create_all()
     app.run()
