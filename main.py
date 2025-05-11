@@ -1,7 +1,8 @@
 from flask import Flask, render_template, redirect, url_for, flash, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, validators
+from wtforms import StringField, PasswordField, validators, ValidationError
+import re
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from markupsafe import Markup
@@ -42,6 +43,21 @@ class RegistrationForm(FlaskForm):
         validators.EqualTo('confirm', message='Пароли должны совпадать')
     ])
     confirm = PasswordField('Повторите пароль')
+
+    def validate_email(self, field):
+        try:
+            validate_email(field.data)
+        except EmailNotValidError as e:
+            raise ValidationError('Некорректный email: ' + str(e))
+
+    def validate_password(self, field):
+        password = field.data
+        if not re.search(r'[A-Z]', password):
+            raise ValidationError('Пароль должен содержать хотя бы одну заглавную букву.')
+        if not re.search(r'\d', password):
+            raise ValidationError('Пароль должен содержать хотя бы одну цифру.')
+        if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+            raise ValidationError('Пароль должен содержать хотя бы один специальный символ.')
 
 
 class LoginForm(FlaskForm):
