@@ -1,4 +1,15 @@
 <style>
+    .heart-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 24px;
+            color: #ccc; /* Серый цвет (неактивное) */
+            transition: color 0.3s;
+        }
+        .heart-btn.liked {
+            color: red; /* Красный цвет при активации */
+        }
     body {
         background-image: url("https://bgfons.com/uploads/ornaments/ornaments_texture1133.jpg")
     }
@@ -83,6 +94,7 @@
         <img src="{{ book.cover_url }}" alt="Обложка {{ book.title }}">
         <div class="book-title" style="color: white;">{{ book.title }}</div>
         <div class="book-author">{{ book.author }}</div>
+        <button class="heart-btn" onclick="this.classList.toggle('liked')">❤️</button>
     </div>
     {% else %}
     <p>Книг пока нет.</p>
