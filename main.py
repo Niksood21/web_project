@@ -1,19 +1,24 @@
 from flask import Flask, render_template, redirect, url_for, flash, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, validators, ValidationError
+from wtforms import StringField, PasswordField, validators, ValidationError, SubmitField
 import re
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from markupsafe import Markup
 from email_validator import validate_email, EmailNotValidError
+from wtforms.validators import DataRequired, Length
 import json
+from flask_wtf.file import FileField, FileAllowed
+import os
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///library.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
+app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'static', 'avatars')
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
@@ -25,6 +30,7 @@ class User(UserMixin, db.Model):
     last_name = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
+    avatar = db.Column(db.String(200), nullable=True)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -36,7 +42,8 @@ class User(UserMixin, db.Model):
 class RegistrationForm(FlaskForm):
     first_name = StringField('Имя', [validators.DataRequired(), validators.Length(min=2, max=50)])
     last_name = StringField('Фамилия', [validators.DataRequired(), validators.Length(min=2, max=50)])
-    email = StringField('Email', [validators.DataRequired(), validators.Email(), validators.Length(max=100)])
+    email = StringField('Email', [validators.DataRequired(), validators.Email(),
+                                  validators.Length(max=100)])
     password = PasswordField('Пароль', [
         validators.DataRequired(),
         validators.Length(min=6),
@@ -70,6 +77,14 @@ class Book(db.Model):
     title = db.Column(db.String(200), nullable=False)
     author = db.Column(db.String(100), nullable=True)
     cover_url = db.Column(db.String(500), nullable=False)
+
+
+class ProfileForm(FlaskForm):
+    first_name = StringField('Имя', validators=[validators.DataRequired(), validators.Length(min=2, max=50)])
+    last_name = StringField('Фамилия', validators=[validators.DataRequired(), validators.Length(min=2, max=50)])
+    avatar = FileField('Аватар', validators=
+    [FileAllowed(['jpg', 'jpeg', 'png', 'gif'], 'Только изображения!')])
+    submit = SubmitField('Сохранить')
 
 
 @login_manager.user_loader
@@ -146,6 +161,25 @@ def book_list():
     pagination = Book.query.paginate(page=page, per_page=30, error_out=False)
     books = pagination.items
     return render_template('books.html', books=books, pagination=pagination)
+
+
+@app.route('/profile', methods=['GET', 'POST'])
+@login_required
+def profile():
+    form = ProfileForm(obj=current_user)
+    if form.validate_on_submit():
+        current_user.first_name = form.first_name.data
+        current_user.last_name = form.last_name.data
+        file = form.avatar.data
+        if file and hasattr(file, 'filename') and file.filename != '':
+            filename = secure_filename(file.filename)
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(filepath)
+            current_user.avatar = f'avatars/{filename}'
+        db.session.commit()
+        flash('Профиль обновлен.')
+        return redirect(url_for('index'))
+    return render_template('profile.html', form=form, user=current_user)
 
 
 if __name__ == '__main__':

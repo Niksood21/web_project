@@ -14,20 +14,29 @@
     </style>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container-fluid", style="background-color: grey; padding: 10px;">
-
             </style>
             <a class="navbar-brand" href="{{ url_for('index') }}">Простая библиотека книг</a>
-            <div class="d-flex ms-auto">
+            <div class="d-flex align-items-center">
+    {% if current_user.is_authenticated %}
+        {% if current_user.avatar %}
+            <img src="{{ url_for('static', filename=current_user.avatar) }}" alt="Аватар"
+                 style="width:40px; height:40px; border-radius:50%; object-fit:cover; margin-right:10px;">
+        {% else %}
+            <img src="{{ url_for('static', filename='default_avatar.png') }}" alt="Аватар"
+                 style="width:40px; height:40px; border-radius:50%; object-fit:cover; margin-right:10px;">
+        {% endif %}
+        <span class="navbar-text me-3" style="color: white;">
+            Привет, {{ current_user.first_name }}!
+        </span>
                 {% if current_user.is_authenticated %}
-                    <span class="navbar-text me-3">
-                        Привет, {{ current_user.first_name }}!
-                    </span>
-                    <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary">Выйти</a>
-                {% else %}
-                    <a href="{{ url_for('login') }}" class="btn btn-outline-primary me-2" style="color: white;">Войти</a>
-                    <a href="{{ url_for('register') }}" class="btn btn-primary">Зарегистрироваться</a>
+                <a href="{{ url_for('profile') }}" class="btn btn-outline-info me-2">Профиль</a>
                 {% endif %}
-            </div>
+        <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary">Выйти</a>
+    {% else %}
+        <a href="{{ url_for('login') }}" class="btn btn-outline-primary me-2" style="color: white;">Войти</a>
+        <a href="{{ url_for('register') }}" class="btn btn-primary">Зарегистрироваться</a>
+    {% endif %}
+</div>
         </div>
     </nav>
     <div class="container mt-5">
@@ -49,6 +58,5 @@
     <div class="container mt-5">
         <h1 style="color: white">Список ваших любимых книг:</h1>
     </div>
-
 </body>
 </html>
